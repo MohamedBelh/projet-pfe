@@ -1,0 +1,34 @@
+version: '3.9'
+
+services:
+  sqlserver:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "STRONG!Passw0rd"
+      MSSQL_PID: "Express"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserverdata:/var/opt/mssql
+
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:80
+      - FullStackConnectionString=Server=sqlserver,1433;Database=FullStackDb;User Id=sa;Password=STRONG!Passw0rd
+    ports:
+      - "5000:80"
+    depends_on:
+      - sqlserver
+    volumes:
+      - appdata:/app
+    expose:
+      - "80"  # Expose port 80 to allow communication between containers
+
+volumes:
+  sqlserverdata:
+  appdata:
